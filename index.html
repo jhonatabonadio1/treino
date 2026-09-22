@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Treino</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Treino">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="application-name" content="Treino">
+<meta name="format-detection" content="telephone=no">
+<meta name="theme-color" content="#E7E8E4" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#15181B" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#E7E8E4; --paper:#F4F4F1; --ink:#1D2227; --muted:#5E656C; --line:#C9CBC5;
+  --m-base:#D5D7D1; --m-stroke:#AEB1AA; --neutral:#C3C6BF;
+  --red:#C2382F; --blue:#2757A3; --yellow:#D39A00; --green:#2E8656; --rest:#7B8086;
+  --day:var(--red);
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#15181B; --paper:#1E2226; --ink:#ECEDE9; --muted:#A1A7AD; --line:#343A40;
+    --m-base:#2E3439; --m-stroke:#4A5157; --neutral:#3A4046;
+    --red:#E0554B; --blue:#5B8FE0; --yellow:#E8B632; --green:#48B07A; --rest:#8C9197;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#15181B; --paper:#1E2226; --ink:#ECEDE9; --muted:#A1A7AD; --line:#343A40;
+  --m-base:#2E3439; --m-stroke:#4A5157; --neutral:#3A4046;
+  --red:#E0554B; --blue:#5B8FE0; --yellow:#E8B632; --green:#48B07A; --rest:#8C9197;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;-webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%;overscroll-behavior-y:none;background:var(--bg);color:var(--ink);font:400 16px/1.5 "Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:760px;margin:0 auto;padding:20px 16px 48px}
+h1,h2,h3,.cond{font-family:"Barlow Condensed","Arial Narrow",system-ui,sans-serif}
+header h1{font-size:44px;line-height:1;font-weight:800;margin:8px 0 6px;letter-spacing:-.5px}
+header p{margin:0;color:var(--muted);max-width:60ch}
+
+/* Plate selector */
+.plates{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);display:flex;gap:6px;justify-content:space-between;padding:14px 0 12px;margin-top:10px;border-bottom:1px solid var(--line)}
+.plate{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;flex:1;aspect-ratio:1;max-width:64px;border-radius:50%;border:none;cursor:pointer;display:grid;place-items:center;color:#fff;font:700 18px/1 "Barlow Condensed",sans-serif;position:relative;background:var(--c);opacity:.45;transition:opacity .15s,transform .15s}
+.plate::after{content:"";position:absolute;width:22%;height:22%;border-radius:50%;background:var(--bg);opacity:.9}
+.plate span{position:absolute;bottom:8%;font-size:12px;letter-spacing:.3px}
+.plate[aria-selected="true"]{opacity:1;transform:scale(1.08)}
+.plate:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+
+/* Day */
+.day-head{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin:22px 0 4px}
+.day-head h2{font-size:56px;line-height:.95;margin:0;font-weight:800;color:var(--day)}
+.day-head .wd{font:600 22px/1 "Barlow Condensed",sans-serif;color:var(--muted)}
+.focus{margin:4px 0 18px;color:var(--muted)}
+
+.mapbox{scroll-margin-top:96px;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:14px 12px 12px}
+.maps{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.maps figure{margin:0;text-align:center}
+.maps figcaption{font-size:13px;color:var(--muted);margin-top:2px}
+.maps svg{width:100%;height:auto;max-height:360px}
+.mus{fill:var(--m-base);stroke:var(--m-stroke);stroke-width:1;transition:fill .2s}
+.neu{fill:var(--neutral)}
+.mus.p{fill:var(--day)}
+.mus.s{fill:color-mix(in srgb,var(--day) 38%,var(--m-base))}
+.map-note{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:10px;font-size:14px;color:var(--muted);min-height:32px}
+.map-note b{color:var(--ink);font-weight:600}
+.reset{border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:999px;padding:5px 12px;font:500 13px "Barlow",sans-serif;cursor:pointer}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.chip{font-size:13px;padding:3px 10px;border-radius:999px;border:1px solid var(--line)}
+.chip.p{background:var(--day);border-color:var(--day);color:#fff}
+.chip.s{border-color:var(--day);color:var(--ink)}
+
+section.blk{margin-top:26px}
+section.blk>h3{font-size:24px;font-weight:700;margin:0 0 10px;padding-left:10px;border-left:4px solid var(--day);line-height:1.1}
+.warm{background:var(--paper);border:1px dashed var(--line);border-radius:12px;padding:12px 14px;margin-top:22px}
+.warm h3{margin:0 0 4px;font-size:20px}
+.warm p{margin:0;color:var(--muted)}
+
+.ex{display:grid;grid-template-columns:28px 1fr;gap:10px;padding:12px 4px 12px 0;border-bottom:1px solid var(--line);align-items:start}
+.ex:last-child{border-bottom:none}
+.ex input{appearance:none;width:24px;height:24px;border:2px solid var(--m-stroke);border-radius:6px;margin:2px 0 0;cursor:pointer;display:grid;place-items:center;background:var(--paper)}
+.ex input:checked{background:var(--day);border-color:var(--day)}
+.ex input:checked::after{content:"";width:7px;height:12px;border:solid #fff;border-width:0 3px 3px 0;transform:rotate(45deg) translate(-1px,-1px)}
+.ex input:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+.ex-body{cursor:pointer;border-radius:8px}
+.ex-body:focus-visible{outline:3px solid var(--day);outline-offset:3px}
+.ex.active .ex-name{color:var(--day)}
+.ex.done .ex-name{text-decoration:line-through;opacity:.6}
+.ex-name{font:700 20px/1.15 "Barlow Condensed",sans-serif}
+.rows{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;margin-top:6px;font-size:15px}
+.rows dt{color:var(--muted)}
+.rows dd{margin:0}
+.rows .tr{font-weight:600}
+.tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.tags span{font-size:12px;color:var(--muted);background:var(--bg);border-radius:6px;padding:1px 7px}
+
+.stretch ul{margin:0;padding-left:18px}
+.stretch li{margin:4px 0}
+.restday{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:18px;margin-top:16px}
+.restday p{margin:0 0 8px}
+
+.glossary{margin-top:44px;padding-top:18px;border-top:2px solid var(--ink)}
+.glossary h2{font-size:30px;margin:0 0 10px}
+.glossary dl{margin:0}
+.glossary dt{font:700 19px/1.2 "Barlow Condensed",sans-serif;margin-top:12px}
+.glossary dd{margin:2px 0 0;color:var(--muted)}
+.clear{margin-top:20px}
+@media (min-width:640px){
+  header h1{font-size:60px}
+  .plate{font-size:22px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Treino da semana</h1>
+    <p>Push / Pull / Legs em alto volume, com séries de aquecimento, séries de trabalho e técnicas de intensidade. Toque num exercício para ver os músculos dele no mapa.</p>
+  </header>
+
+  <nav class="plates" role="tablist" aria-label="Dias da semana" id="plates"></nav>
+
+  <main id="day"></main>
+
+  <section class="glossary" aria-labelledby="gl">
+    <h2 id="gl">Termos do treino</h2>
+    <dl>
+      <dt>Série de aquecimento</dt>
+      <dd>Carga leve, feita no próprio aparelho ou exercício, só pra preparar articulação e movimento. Não conta como série de trabalho e fica longe da falha.</dd>
+      <dt>Série de trabalho</dt>
+      <dd>As séries que valem pro resultado: carga real, terminando a 0-2 repetições da falha.</dd>
+      <dt>Drop set</dt>
+      <dd>Chegou na falha, reduz 20-30% da carga e continua sem descanso. "Duplo" = duas reduções seguidas.</dd>
+      <dt>Rest-pause</dt>
+      <dd>Vai até perto da falha, descansa 15-20s, faz mais algumas reps. Repete 2-3 vezes.</dd>
+      <dt>Bi-set</dt>
+      <dd>Dois exercícios seguidos, sem descanso entre eles. Descansa só depois do segundo.</dd>
+      <dt>Pausa e cadência</dt>
+      <dd>Segurar 1-2s no ponto de maior contração, ou descer a carga em 3s, pra aumentar o tempo sob tensão.</dd>
+    </dl>
+    <button class="reset clear" id="clearAll" type="button">Desmarcar todos os exercícios</button>
+  </section>
+</div>
+
+<script>
+const MUSCLES = {
+  peito:"Peitoral", ombro:"Deltoide anterior/lateral", biceps:"Bíceps", antebraco:"Antebraço",
+  abdomen:"Abdômen", obliquos:"Oblíquos", quadriceps:"Quadríceps", adutores:"Adutores",
+  panturrilha:"Panturrilha", trapezio:"Trapézio", deltoide_post:"Deltoide posterior",
+  romboides:"Romboides / trapézio médio", redondo:"Redondo maior", dorsal:"Grande dorsal",
+  lombar:"Eretores da espinha (lombar)", triceps:"Tríceps", gluteo:"Glúteos", posterior:"Posteriores de coxa"
+};
+
+/* Left-side shapes; mirrored to build the full body */
+const FRONT = [
+  ["neu","M92 50 H100 V64 H92 Z"],
+  ["trapezio","M92 60 L100 62 L100 70 L78 72 C84 68 90 64 92 60 Z"],
+  ["ombro","M78 71 C64 70 54 78 52 92 C52 100 56 104 60 104 C62 92 68 82 80 76 Z"],
+  ["peito","M100 74 L100 110 C92 116 76 116 68 108 C62 100 64 86 74 78 C82 74 92 73 100 74 Z"],
+  ["biceps","M58 106 C52 116 50 132 52 146 C56 150 62 150 66 146 C68 132 66 116 62 106 Z"],
+  ["antebraco","M52 152 C46 166 44 184 46 204 C50 206 54 206 56 204 C60 186 64 168 64 152 Z"],
+  ["neu","M50 208 C44 208 42 216 44 224 C46 230 52 230 54 224 C56 216 56 208 50 208 Z"],
+  ["obliquos","M70 116 C68 134 70 156 72 176 C74 182 78 186 82 184 L80 118 Z"],
+  ["abdomen","M100 114 L100 186 C94 190 88 189 84 184 L82 120 C88 116 94 114 100 114 Z"],
+  ["neu","M72 180 C72 192 74 200 78 204 L100 210 L100 190 C92 192 84 190 72 180 Z"],
+  ["quadriceps","M76 204 C70 230 70 262 76 294 C82 300 90 298 94 292 C96 268 96 236 96 212 C90 206 84 202 76 204 Z"],
+  ["adutores","M97 210 L100 211 L100 244 C99 256 97 266 95 272 C94 250 94 228 97 210 Z"],
+  ["neu","M84 296 C76 296 74 304 76 310 C78 316 90 316 92 310 C94 304 92 296 84 296 Z"],
+  ["panturrilha","M76 314 C72 332 74 354 80 370 L90 370 C94 352 94 330 90 314 Z"],
+  ["neu","M78 372 H92 C96 378 94 384 88 384 H78 C74 384 74 376 78 372 Z"]
+];
+const BACK = [
+  ["neu","M92 50 H100 V60 H92 Z"],
+  ["trapezio","M100 56 L100 124 C94 112 86 98 80 82 C76 74 76 70 82 68 C90 66 96 62 100 56 Z"],
+  ["romboides","M100 78 L100 114 C96 108 92 100 90 90 C92 84 96 80 100 78 Z"],
+  ["deltoide_post","M79 71 C64 70 54 78 52 92 C52 100 56 104 60 104 C64 92 70 84 81 80 Z"],
+  ["redondo","M80 84 C72 90 66 98 66 106 C72 110 80 106 84 100 C86 94 84 88 80 84 Z"],
+  ["dorsal","M66 108 C64 126 70 150 80 170 C88 178 96 180 100 178 L100 126 C94 118 88 110 85 102 C79 108 72 110 66 108 Z"],
+  ["lombar","M100 140 L100 192 C95 192 91 190 88 186 C88 170 90 154 94 142 Z"],
+  ["triceps","M58 106 C52 116 50 132 52 146 C56 150 62 150 66 146 C68 132 66 116 62 106 Z"],
+  ["antebraco","M52 152 C46 166 44 184 46 204 C50 206 54 206 56 204 C60 186 64 168 64 152 Z"],
+  ["neu","M50 208 C44 208 42 216 44 224 C46 230 52 230 54 224 C56 216 56 208 50 208 Z"],
+  ["neu","M72 176 C70 184 72 192 76 196 L88 194 C86 188 84 182 80 172 Z"],
+  ["gluteo","M100 192 L100 234 C90 240 76 236 72 224 C70 210 74 198 82 194 C88 192 94 192 100 192 Z"],
+  ["posterior","M74 236 C70 256 72 280 78 294 C84 300 92 298 96 292 C98 274 98 254 98 238 C90 242 80 240 74 236 Z"],
+  ["neu","M84 296 C76 296 74 304 76 310 C78 316 90 316 92 310 C94 304 92 296 84 296 Z"],
+  ["panturrilha","M76 314 C68 328 70 346 78 356 C84 360 92 358 94 350 C96 336 94 322 90 314 Z"],
+  ["neu","M80 356 L90 356 L88 372 L82 372 Z"],
+  ["neu","M78 372 H92 C96 378 94 384 88 384 H78 C74 384 74 376 78 372 Z"]
+];
+
+function buildSVG(shapes, label){
+  let one = shapes.map(([m,d]) => m==="neu"
+    ? `<path class="neu" d="${d}"/>`
+    : `<path class="mus" data-m="${m}" d="${d}"/>`).join("");
+  return `<svg viewBox="30 4 140 386" role="img" aria-label="${label}">
+    <ellipse class="neu" cx="100" cy="28" rx="16" ry="20"/>
+    <g>${one}</g><g transform="matrix(-1 0 0 1 200 0)">${one}</g></svg>`;
+}
+
+const DAYS = [
+ { id:"seg", letter:"S", wd:"Segunda", name:"Push A", color:"red",
+   focus:"Peito, ombro e tríceps. Peito como prioridade do dia.",
+   warm:"3-5 min de bike leve ou polichinelos + 10 rotações de ombro pra frente e pra trás.",
+   primary:["peito","ombro","triceps"], secondary:["trapezio"],
+   blocks:[
+    {t:"Peito", ex:[
+      {n:"Supino reto (barra ou halteres)", aq:"2 séries: carga leve ×12, ~60% ×6", tr:"4 × 6-8", tec:"Descanso 2-3 min. Escápulas presas no banco.", m:["peito","ombro","triceps"]},
+      {n:"Supino inclinado com halteres", aq:"1 série leve ×10", tr:"3 × 8-10", tec:"Rest-pause na última série.", m:["peito","ombro","triceps"]},
+      {n:"Crucifixo no cross-over", tr:"3 × 12-15", tec:"Pausa de 1s com as mãos juntas.", m:["peito"]}
+    ]},
+    {t:"Ombro", ex:[
+      {n:"Desenvolvimento militar", aq:"1-2 séries leves ×10", tr:"3 × 8-10", tec:"Descanso 2 min.", m:["ombro","triceps","trapezio"]},
+      {n:"Elevação lateral", tr:"4 × 12-15", tec:"Drop set na última série.", m:["ombro"]}
+    ]},
+    {t:"Tríceps", ex:[
+      {n:"Tríceps corda", aq:"1 série leve ×15", tr:"3 × 12-15", tec:"Pausa de 1s com os braços estendidos.", m:["triceps"]},
+      {n:"Tríceps francês", tr:"3 × 10-12", tec:"Descida em 3s.", m:["triceps"]}
+    ]}
+   ],
+   stretch:["Peitoral na porta: 20-30s cada lado","Tríceps com o braço atrás da cabeça: 20s cada lado","Ombro cruzado na frente do corpo: 20s cada lado"]
+ },
+ { id:"ter", letter:"T", wd:"Terça", name:"Pull A", color:"blue",
+   focus:"Costas completas com prioridade em postura.",
+   warm:"3-5 min de bike leve ou polichinelos, só pra subir a temperatura.",
+   primary:["dorsal","romboides","deltoide_post","trapezio","redondo","biceps"], secondary:["antebraco","lombar"],
+   blocks:[
+    {t:"Largura (dorsal)", ex:[
+      {n:"Puxada frontal pegada aberta", aq:"1-2 séries leves ×10-12", tr:"4 × 10-12", tec:"Drop set duplo na última série.", m:["dorsal","redondo","biceps"]},
+      {n:"Barra fixa supinada ou puxada supinada", aq:"1 série leve ou assistida ×8-10", tr:"3 × 8-10", m:["dorsal","biceps","redondo"]},
+      {n:"Pulldown unilateral no cabo", tr:"3 × 12 cada lado", tec:"Pausa de 1-2s no pico.", m:["dorsal","redondo"]}
+    ]},
+    {t:"Espessura (meio das costas)", ex:[
+      {n:"Remada na máquina Panatta (apoio no peito)", aq:"1 série leve ×12", tr:"4 × 8-10", m:["dorsal","romboides","trapezio","deltoide_post"]},
+      {n:"Remada baixa pegada neutra", aq:"1 série leve ×12", tr:"4 × 10-12", tec:"Rest-pause na última série.", m:["dorsal","romboides","biceps"]},
+      {n:"Remada unilateral com halter", tr:"3 × 10-12 cada lado", tec:"Descida em 3s.", m:["dorsal","redondo","biceps"]}
+    ]},
+    {t:"Postura (prioridade)", ex:[
+      {n:"Bi-set: crucifixo invertido no peck deck + face pull", aq:"1 série leve no peck deck ×15", tr:"4 × 15-20 cada", tec:"Sem descanso entre os dois.", m:["deltoide_post","romboides","trapezio"]}
+    ]},
+    {t:"Finalização", ex:[
+      {n:"Pulldown com corda (braços estendidos)", tr:"3 × 12-15", m:["dorsal","redondo"]},
+      {n:"Encolhimento com halteres", tr:"3 × 12-15", tec:"Pausa de 2s no topo.", m:["trapezio","antebraco"]}
+    ]},
+    {t:"Bíceps", ex:[
+      {n:"Rosca direta na barra W", tr:"3 × 10-12", m:["biceps","antebraco"]},
+      {n:"Rosca martelo", tr:"3 × 12", tec:"Drop set na última série.", m:["biceps","antebraco"]}
+    ]}
+   ],
+   stretch:["Braço sobre a cabeça, mão no ombro oposto: 20s cada lado","Pendurado na barra fixa: 20-30s","Peitoral na porta: 20-30s"]
+ },
+ { id:"qua", letter:"Q", wd:"Quarta", name:"Legs A", color:"yellow",
+   focus:"Quadríceps, posterior e panturrilha, com abdômen no fim.",
+   warm:"5 min de bike + 10 agachamentos só com o peso do corpo.",
+   primary:["quadriceps","posterior","gluteo","panturrilha","abdomen"], secondary:["adutores","lombar","obliquos"],
+   blocks:[
+    {t:"Quadríceps", ex:[
+      {n:"Agachamento livre", aq:"3 séries progressivas: barra vazia ×10, ~50% ×6, ~70% ×4", tr:"4 × 6-8", tec:"Descanso 2-3 min.", m:["quadriceps","gluteo","adutores","lombar"]},
+      {n:"Cadeira extensora", aq:"1 série leve ×15", tr:"3 × 12-15", tec:"Pausa de 1s no topo + drop set na última.", m:["quadriceps"]}
+    ]},
+    {t:"Posterior", ex:[
+      {n:"Stiff", aq:"1 série leve ×10", tr:"3 × 10-12", tec:"Descida em 3s, coluna neutra.", m:["posterior","gluteo","lombar"]},
+      {n:"Mesa flexora", tr:"3 × 10-12", tec:"Novo: completa o posterior com flexão de joelho.", m:["posterior","panturrilha"]}
+    ]},
+    {t:"Panturrilha", ex:[
+      {n:"Panturrilha em pé unilateral", aq:"1 série leve ×20", tr:"4 × 15-20", tec:"Começa pela perna menor. Pausa de 2s embaixo, alongada.", m:["panturrilha"]},
+      {n:"Panturrilha sentado", tr:"3 × 15-20", tec:"Drop set na última série.", m:["panturrilha"]}
+    ]},
+    {t:"Abdômen", ex:[
+      {n:"Prancha + elevação de pernas", tr:"3 séries: prancha 30-45s + 12-15 elevações", m:["abdomen","obliquos"]}
+    ]}
+   ],
+   stretch:["Quadríceps em pé, puxando o pé pra trás: 20-30s cada","Posterior sentado, alcançando o pé: 30s","Panturrilha na parede: 20-30s cada"]
+ },
+ { id:"qui", letter:"Q", wd:"Quinta", name:"Descanso", color:"rest", rest:true,
+   focus:"Recuperação.", primary:[], secondary:[] },
+ { id:"sex", letter:"S", wd:"Sexta", name:"Push B", color:"red",
+   focus:"Peito superior, ombro e tríceps.",
+   warm:"3-5 min de bike leve + 10 rotações de ombro pra frente e pra trás.",
+   primary:["peito","ombro","triceps"], secondary:[],
+   blocks:[
+    {t:"Peito", ex:[
+      {n:"Supino inclinado articulado", aq:"2 séries: carga leve ×12, ~60% ×6", tr:"4 × 6-8", tec:"Descanso 2-3 min.", m:["peito","ombro","triceps"]},
+      {n:"Crucifixo ou peck deck", aq:"1 série leve ×15", tr:"3 × 12-15", tec:"Pausa de 1s na contração + drop set na última.", m:["peito"]}
+    ]},
+    {t:"Ombro", ex:[
+      {n:"Desenvolvimento na máquina", aq:"1 série leve ×12", tr:"3 × 10-12", m:["ombro","triceps"]},
+      {n:"Elevação lateral", tr:"3 × 12-15", tec:"Drop set na última série.", m:["ombro"]}
+    ]},
+    {t:"Tríceps", ex:[
+      {n:"Tríceps testa", aq:"1 série leve ×12", tr:"3 × 10-12", tec:"Descida em 3s.", m:["triceps"]},
+      {n:"Mergulho no banco", tr:"3 × 12-15", tec:"Última série até a falha.", m:["triceps","peito","ombro"]}
+    ]}
+   ],
+   stretch:["Peitoral na porta: 20-30s cada lado","Tríceps com o braço atrás da cabeça: 20s cada lado","Ombro cruzado na frente do corpo: 20s cada lado"]
+ },
+ { id:"sab", letter:"S", wd:"Sábado", name:"Pull B", color:"blue",
+   focus:"Força de cadeia posterior e costas, com prioridade em postura.",
+   warm:"5 min de remo ergométrico leve + band pull-apart 2 × 15.",
+   primary:["dorsal","lombar","trapezio","deltoide_post","romboides","biceps"], secondary:["gluteo","posterior","antebraco","redondo"],
+   blocks:[
+    {t:"Força", ex:[
+      {n:"Levantamento terra", aq:"3 séries progressivas: ~40% ×8, ~60% ×5, ~80% ×2", tr:"4 × 5-6", tec:"Descanso 3 min. Carga só sobe com a técnica perfeita.", m:["lombar","gluteo","posterior","trapezio","dorsal","antebraco"]}
+    ]},
+    {t:"Largura", ex:[
+      {n:"Puxada supinada ou barra fixa supinada", aq:"1 série leve ×10", tr:"4 × 8-10", tec:"Rest-pause na última série.", m:["dorsal","biceps","redondo"]}
+    ]},
+    {t:"Espessura", ex:[
+      {n:"Remada unilateral com halter", tr:"3 × 10-12 cada lado", tec:"Pausa de 1s com o cotovelo lá atrás.", m:["dorsal","romboides","biceps"]}
+    ]},
+    {t:"Postura (prioridade)", ex:[
+      {n:"Face pull ou crucifixo invertido", aq:"1 série leve ×20", tr:"4 × 15-20", tec:"Pausa de 2s com as escápulas juntas.", m:["deltoide_post","romboides","trapezio"]}
+    ]},
+    {t:"Trapézio e bíceps", ex:[
+      {n:"Encolhimento", tr:"3 × 12-15", tec:"Pausa de 2s no topo.", m:["trapezio","antebraco"]},
+      {n:"Rosca alternada", tr:"3 × 10-12", tec:"Gira o punho (supinação) no topo.", m:["biceps","antebraco"]}
+    ]}
+   ],
+   stretch:["Pendurado na barra fixa: 20-30s","Posterior de coxa em pé, tronco à frente: 30s","Peitoral na porta: 20-30s"]
+ },
+ { id:"dom", letter:"D", wd:"Domingo", name:"Legs B", color:"green",
+   focus:"Glúteo, posterior e panturrilha, com abdômen lateral no fim.",
+   warm:"5 min de bike + 10 elevações pélvicas sem carga.",
+   primary:["gluteo","quadriceps","posterior","panturrilha","obliquos"], secondary:["adutores","abdomen"],
+   blocks:[
+    {t:"Quadríceps e glúteo", ex:[
+      {n:"Leg press", aq:"2 séries: leve ×15, ~60% ×10", tr:"4 × 8-10", tec:"Rest-pause na última série.", m:["quadriceps","gluteo","adutores"]},
+      {n:"Afundo ou passada", aq:"1 série só com o corpo ×10", tr:"3 × 10-12 cada perna", m:["quadriceps","gluteo","adutores"]}
+    ]},
+    {t:"Posterior e glúteo", ex:[
+      {n:"Cadeira flexora", aq:"1 série leve ×15", tr:"3 × 12-15", tec:"Drop set na última série.", m:["posterior"]},
+      {n:"Elevação pélvica", aq:"1 série leve ×12", tr:"3 × 12-15", tec:"Pausa de 2s no topo.", m:["gluteo","posterior"]}
+    ]},
+    {t:"Panturrilha", ex:[
+      {n:"Panturrilha unilateral no step", aq:"1 série leve ×20", tr:"4 × 15-20", tec:"Perna menor com 20-30% mais volume.", m:["panturrilha"]}
+    ]},
+    {t:"Abdômen", ex:[
+      {n:"Rotação + prancha lateral", tr:"3 séries: 12-15 rotações + 30s de prancha cada lado", m:["obliquos","abdomen"]}
+    ]}
+   ],
+   stretch:["Quadríceps em pé, puxando o pé pra trás: 20-30s cada","Glúteo deitado, perna cruzada (figura 4): 30s cada","Panturrilha na parede: 20-30s cada"]
+ }
+];
+
+const store = {
+  get(k){ try{ return JSON.parse(localStorage.getItem(k)) || {}; }catch(e){ return {}; } },
+  set(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+};
+let done = store.get("treino-done");
+let current = null, activeEx = null;
+
+function jsDayToId(){
+  const map = ["dom","seg","ter","qua","qui","sex","sab"];
+  return map[new Date().getDay()];
+}
+
+function renderPlates(){
+  const nav = document.getElementById("plates");
+  nav.innerHTML = DAYS.map(d => `<button class="plate" role="tab" id="tab-${d.id}" aria-controls="day"
+    aria-selected="false" style="--c:var(--${d.color})" data-id="${d.id}" title="${d.wd}: ${d.name}">
+    ${d.letter}<span>${d.rest ? "OFF" : d.name.replace(/\s/,"")}</span></button>`).join("");
+  nav.addEventListener("click", e => { const b = e.target.closest(".plate"); if(b) selectDay(b.dataset.id); });
+}
+
+function paint(primary, secondary){
+  document.querySelectorAll(".mus").forEach(p => {
+    const m = p.dataset.m;
+    p.classList.toggle("p", primary.includes(m));
+    p.classList.toggle("s", !primary.includes(m) && secondary.includes(m));
+  });
+}
+
+function chips(d){
+  return d.primary.map(m=>`<span class="chip p">${MUSCLES[m]}</span>`).join("") +
+         d.secondary.map(m=>`<span class="chip s">${MUSCLES[m]}</span>`).join("");
+}
+
+function selectDay(id){
+  const d = DAYS.find(x => x.id === id); current = d; activeEx = null;
+  document.querySelectorAll(".plate").forEach(b => b.setAttribute("aria-selected", b.dataset.id === id));
+  document.documentElement.style.setProperty("--day", `var(--${d.color})`);
+  const main = document.getElementById("day");
+
+  let html = `<div class="day-head"><h2>${d.name}</h2><span class="wd">${d.wd}</span></div>
+    <p class="focus">${d.focus}</p>`;
+
+  if(d.rest){
+    html += `<div class="restday"><p><b>Descanso total</b> ou caminhada leve de 20-30 min.</p>
+      <p>Se quiser, 5-10 min de mobilidade de ombro e quadril. Sem carga.</p>
+      <p style="color:var(--muted);margin:0">É aqui que o músculo cresce: dormir bem e bater a proteína do dia contam mais que qualquer treino extra.</p></div>`;
+    main.innerHTML = html; return;
+  }
+
+  html += `<div class="mapbox">
+    <div class="maps">
+      <figure>${buildSVG(FRONT,"Corpo de frente")}<figcaption>Frente</figcaption></figure>
+      <figure>${buildSVG(BACK,"Corpo de costas")}<figcaption>Costas</figcaption></figure>
+    </div>
+    <div class="map-note" id="note"><span>Músculos do dia inteiro</span></div>
+    <div class="chips" id="chips">${chips(d)}</div>
+  </div>
+  <div class="warm"><h3>Aquecimento geral</h3><p>${d.warm}</p></div>`;
+
+  d.blocks.forEach((b,bi) => {
+    html += `<section class="blk"><h3>${b.t}</h3>`;
+    b.ex.forEach((e,ei) => {
+      const key = `${d.id}-${bi}-${ei}`;
+      const isDone = !!done[key];
+      html += `<div class="ex${isDone?" done":""}" data-key="${key}">
+        <input type="checkbox" aria-label="Marcar ${e.n} como feito" ${isDone?"checked":""}>
+        <div class="ex-body" tabindex="0" role="button" aria-pressed="false">
+          <div class="ex-name">${e.n}</div>
+          <dl class="rows">
+            ${e.aq ? `<dt>Aquecimento</dt><dd>${e.aq}</dd>` : ""}
+            <dt>Trabalho</dt><dd class="tr">${e.tr}</dd>
+            ${e.tec ? `<dt>Técnica</dt><dd>${e.tec}</dd>` : ""}
+          </dl>
+          <div class="tags">${e.m.map(m=>`<span>${MUSCLES[m]}</span>`).join("")}</div>
+        </div></div>`;
+    });
+    html += `</section>`;
+  });
+
+  html += `<section class="blk stretch"><h3>Alongamento pós-treino</h3><ul>${d.stretch.map(s=>`<li>${s}</li>`).join("")}</ul></section>`;
+  main.innerHTML = html;
+  paint(d.primary, d.secondary);
+
+  main.querySelectorAll(".ex").forEach(row => {
+    const [,bi,ei] = row.dataset.key.split("-");
+    const ex = d.blocks[bi].ex[ei];
+    row.querySelector("input").addEventListener("change", ev => {
+      if(ev.target.checked) done[row.dataset.key] = 1; else delete done[row.dataset.key];
+      row.classList.toggle("done", ev.target.checked);
+      store.set("treino-done", done);
+    });
+    const body = row.querySelector(".ex-body");
+    const act = () => focusExercise(row, ex);
+    body.addEventListener("click", act);
+    body.addEventListener("keydown", k => { if(k.key==="Enter"||k.key===" "){ k.preventDefault(); act(); } });
+  });
+}
+
+function focusExercise(row, ex){
+  const note = document.getElementById("note");
+  document.querySelectorAll(".ex").forEach(r => { r.classList.remove("active"); r.querySelector(".ex-body").setAttribute("aria-pressed","false"); });
+  if(activeEx === row){ activeEx = null; showDay(); return; }
+  activeEx = row; row.classList.add("active"); row.querySelector(".ex-body").setAttribute("aria-pressed","true");
+  paint([ex.m[0]], ex.m.slice(1));
+  note.innerHTML = `<span><b>${ex.n}</b></span><button class="reset" type="button" id="back">Ver o dia</button>`;
+  document.getElementById("back").addEventListener("click", () => { row.classList.remove("active"); activeEx = null; showDay(); });
+  document.getElementById("chips").innerHTML = `<span class="chip p">${MUSCLES[ex.m[0]]}</span>` +
+    ex.m.slice(1).map(m=>`<span class="chip s">${MUSCLES[m]}</span>`).join("");
+  document.querySelector(".mapbox").scrollIntoView({behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block:"start"});
+}
+
+function showDay(){
+  paint(current.primary, current.secondary);
+  document.getElementById("note").innerHTML = `<span>Músculos do dia inteiro</span>`;
+  document.getElementById("chips").innerHTML = chips(current);
+}
+
+document.getElementById("clearAll").addEventListener("click", () => {
+  done = {}; store.set("treino-done", done); selectDay(current.id);
+});
+
+renderPlates();
+selectDay(jsDayToId());
+
+// Offline + modo app
+if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
+  window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+}
+// Só pula pro treino de hoje se a data mudou desde a última vez que o app ficou visível
+let lastDate = new Date().toDateString();
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState !== "visible") return;
+  const today = new Date().toDateString();
+  if (today !== lastDate) { lastDate = today; selectDay(jsDayToId()); }
+});
+</script>
+</body>
+</html>
